@@ -1,0 +1,87 @@
+﻿@page "/ListContact"
+@using Miniprojet.Shared.Entites
+@inject NavigationManager Navigation
+<PageTitle>Contacts</PageTitle>
+<h1>Get List of Contacts</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Nom</th>
+            <th scope="col">Prenom</th>
+            <th scope="col">Telephone</th>
+            <th scope="col">Email</th>        
+            <th scope="col" colspan="3">
+                <button @onclick="NewPage" type="button" class="btn btn-primary">AjouterClient</button>
+            </th>
+
+
+
+
+
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var contacts in contact)
+        {
+            <tr>
+
+                <th scope="row">@contacts.Nom</th>
+                <td>@contacts.Prenom</td>
+                <td>@contacts.Telephone</td>
+                <td>@contacts.Email</td>
+                
+               
+                <th scope="col">
+                    <button @onclick="()=>ContactModifier(contacts.Id)" type="button" class="btn btn-success">Modifier </button>
+                </th>
+                <th scope="col">
+                    <button @onclick="()=>ContactSupprimer(contacts.Id)" type="button" class="btn btn-danger">Supprimer </button>
+                </th>
+              
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+@code {
+    [Inject]
+    public HttpClient _httpclient { get; set; }
+    private List<Contact> contact { get; set; } = new List<Contact>();
+    protected override async Task OnInitializedAsync()
+    {
+        contact = await _httpclient.GetFromJsonAsync<List<Contact>>("api/Contact/");
+    }
+ 
+    private void ContactModifier(int ContactId)
+    {
+        Navigation.NavigateTo($"/Modifiercontacts/{ContactId}");
+    }
+
+    private async void ContactSupprimer(int ContactId)
+    {
+        var find = contact.FirstOrDefault(c => c.Id == ContactId);
+        if (find != null)
+        {
+            var response = await _httpclient.DeleteAsync($"api/Contact/{ContactId}");
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo(Navigation.Uri, true);
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo(Navigation.Uri, true);
+        }
+
+    }
+    private void NewPage()
+    {
+        Navigation.NavigateTo("/NewContact");
+    }
+
+}

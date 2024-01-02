@@ -1,0 +1,49 @@
+﻿<!-- DetailClient.razor -->
+@page "/Detailclient/{ClientId:int}"
+@using Miniprojet.Shared.Entites
+<PageTitle>Client Details</PageTitle>
+<h3>Client Details</h3>
+
+@if (clients != null)
+{
+    @foreach (var client in clients)
+    {
+        <div>
+            <img src="/Image/@client.ImageUrl" />
+            <p><strong>Raison sociale:</strong> @client.RaisonSociale</p>
+            <p><strong>Description:</strong> @client.Description</p>
+            <p><strong>Adresse1:</strong> @client.Adresse1</p>
+            <p><strong>Adresse2:</strong> @client.Adresse2</p>
+            <p><strong>CodePostal:</strong> @client.CodePostal</p>
+            <p><strong>Pays:</strong> @client.Pays</p>
+            <p><strong>Ville:</strong> @client.Ville</p>
+            <p><strong>TelephoneSecreteriat:</strong> @client.TelephoneSecreteriat</p>
+
+            @foreach (var contact in client.Contacts)
+            {
+                <p>Contact:  @contact.Nom @contact.Prenom  @contact.Email  @contact.Telephone </p>
+            }
+        </div>
+    }
+}
+else
+{
+    <p>Loading...</p>
+}
+   
+
+
+
+@code {
+    [Inject]
+    public HttpClient _httpClient { get; set; }
+    private List<Clients> clients { get; set; } = new List<Clients>();
+    [Parameter]
+    public int ClientId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await _httpClient.GetFromJsonAsync<List<Clients>>($"api/Client/GetClientinContactdAsync/{ClientId}");
+
+    }
+}

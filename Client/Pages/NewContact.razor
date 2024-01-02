@@ -1,0 +1,81 @@
+﻿@page "/NewContact"
+@using Miniprojet.Shared.Entites
+@inject NavigationManager Navigation
+
+<PageTitle>New Client</PageTitle>
+<h3>New Client</h3>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <EditForm Model="contact" OnInvalidSubmit="Create" class="shadow p-4">
+                <div class="mb-3">
+                    <label for="Nom">Select Client</label>
+                    <InputSelect id="ClientId" @bind-Value="contact.ClientId" class="form-control">
+                        <option>
+                            select Client
+                        </option>
+                        @foreach (var options in _clients)
+                        {
+                            <option value="@options.Id">@options.RaisonSociale</option>
+                        }
+                    </InputSelect>
+                </div>
+
+
+                <div class="mb-3">
+                    <label for="Nom">Nom</label>
+                    <InputText type="text" class="form-control" name="Nom" id="Nom" placeholder="Nom" @bind-Value="contact.Nom">
+                    </InputText>
+
+                </div>
+                <div class="mb-3">
+                    <label for="Prenom">Prenom</label>
+                    <InputText type="text" class="form-control" name="Nom" id="Prenom" placeholder="Prenom" @bind-Value="contact.Prenom">
+                    </InputText>
+
+                </div>
+                <div class="mb-3">
+                    <label for="Telephone">Telephone</label>
+                    <InputText type="text" class="form-control" name="Telephone" id="Telephone" placeholder="Telephone" @bind-Value="contact.Telephone">
+                    </InputText>
+
+                </div>
+                <div class="mb-3">
+                    <label for="Email">Email</label>
+                    <InputText type="text" class="form-control" name="Email" id="Email" placeholder="Email" @bind-Value="contact.Email">
+                    </InputText>
+
+                </div>
+
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary" @onclick="Create">Ajouter</button>
+                </div>
+
+                <hr>
+
+              
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]
+    public HttpClient _httpClient { get; set; }
+
+    private Contact contact = new Contact();
+    private List<Clients> _clients = new List<Clients>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _clients = await _httpClient.GetFromJsonAsync<List<Clients>>("api/Client/");
+    }
+
+    private async Task Create()
+    {
+        var result = await _httpClient.PostAsJsonAsync("api/Contact/", contact);
+        // Handle the result as needed
+    }
+}

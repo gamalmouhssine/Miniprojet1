@@ -1,0 +1,103 @@
+﻿@page "/NewClient"
+@using Miniprojet.Shared.DTO;
+@using Miniprojet.Shared.Entites
+@inject NavigationManager Navigation
+
+<PageTitle>New Client</PageTitle>
+<h3>New Client</h3>
+
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+               
+                     
+                <EditForm Model="client" OnInvalidSubmit="Create" class="shadow p-4">
+                    <div class="mb-3">
+                        <label for="RaisonSociale">RaisonSociale</label>
+                        <InputText type="text" class="form-control" name="RaisonSociale" id="RaisonSociale" placeholder="RaisonSociale" @bind-Value="client.RaisonSociale"></InputText>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Description">Description</label>
+                        <InputTextArea type="text" class="form-control" name="Description" id="Description" placeholder="Description" @bind-Value="client.Description">
+                            </InputTextArea>
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="Adresse1">Adresse1</label>
+                        <InputText type="text" class="form-control" name="Adresse1" id="Adresse1" placeholder="Adresse1" @bind-Value="client.Adresse1"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Adresse2">Adresse2</label>
+                        <InputText type="text" class="form-control" name="Adresse2" id="Adresse2" placeholder="Adresse2" @bind-Value="client.Adresse2"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CodePostal">CodePostal</label>
+                        <InputText type="text" class="form-control" name="CodePostal" id="CodePostal" placeholder="CodePostal" @bind-Value="client.CodePostal"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Ville">Ville</label>
+                        <InputText type="text" class="form-control" name="Ville" id="Ville" placeholder="Ville" @bind-Value="client.Ville"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Pays">Pays</label>
+                        <InputText type="text" class="form-control" name="Pays" id="Pays" placeholder="Pays" @bind-Value="client.Pays"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TelephoneSecreteriat">TelephoneSecreteriat</label>
+                        <InputText type="text" class="form-control" name="TelephoneSecreteriat" id="TelephoneSecreteriat" placeholder="TelephoneSecreteriat" @bind-Value="client.TelephoneSecreteriat"></InputText>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ImageUrl">Image</label>
+                    <InputFile type="text" class="form-control" name="ImageUrl" id="ImageUrl" OnChange="@SelectImg" placeholder="ImageUrl" ></InputFile>
+                        <img src="@url" style="width:150px" />
+                    </div>
+               
+                    <div class="mb-3">
+                    <button type="submit" class="btn btn-primary" @onclick="Create">Ajouter</button>
+                    </div>
+
+                <hr>
+            </EditForm>
+                
+            </div>
+        </div>
+    </div>
+
+
+@code {
+    [Inject]
+    public HttpClient _httpclient { get; set; }
+
+    public ClientDTO client = new ClientDTO();
+    IBrowserFile Selectimg;
+    string url;
+    public async Task Create()
+    {
+        client.ImageUrl = Selectimg.Name;
+        using(var ms=new MemoryStream())
+        {
+            await Selectimg.OpenReadStream().CopyToAsync(ms);
+            client.NewImg = ms.ToArray();
+            ms.Dispose();       
+        }
+        var result = await _httpclient.PostAsJsonAsync("api/Client/", client);
+
+        if (result.IsSuccessStatusCode)
+        {
+            // Optionally, redirect to the list of clients or another relevant page
+            Navigation.NavigateTo("/ListClients");
+        }
+
+    }
+    public async Task SelectImg(InputFileChangeEventArgs e)
+    {
+        Selectimg = e.File;
+        var buffer = new byte[Selectimg.Size];
+        await Selectimg.OpenReadStream().ReadAsync(buffer);
+        string imgtype = Selectimg.ContentType;
+        url = $"data:{imgtype};Base64,{Convert.ToBase64String(buffer)}";
+        this.StateHasChanged();
+    }
+}
